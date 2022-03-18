@@ -1,5 +1,11 @@
 # TODAY'S TSP
 
+import string
+import matplotlib
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
 # Create a file generator class for LKH
 
 class LKH_file_generator:
@@ -123,7 +129,7 @@ class TSP:
 
     def create_cost_i(self, veh_num, ret_cost):
         stack = []
-        p_1 = self.Veh[veh_num - 1]
+        p_1 = self.Veh[veh_num]
         stack.append(p_1)
         for row in range(len(self.Tar)):
             stack.append(self.Tar[row])
@@ -196,19 +202,89 @@ def transformation_algorithm(G):
     
     return C_t
 
-# Plot the optimal tour on the transformed graph    
+# Plot the optimal tour to the HMDMURP   
 
-def plot_transformed_LKH(C, F):
-    E = []
+def plot_transformed_LKH(G, C, F):
+
+    Plot_Matrix = []
+    Plot_Matrix_X = []
+    Plot_Matrix_Y = []
+    veh_x = []
+    veh_y = []
+    tar_x = []
+    tar_y = []
+    E_1 = []
+    E_2 = []
+    Veh = []
+    Veh_depo = []
+    Tar = []
+
+    for i in range(G.m):
+        Plot_Matrix.append([])
+        Plot_Matrix_X.append([])
+        Plot_Matrix_Y.append([])
+        veh_x.append(G.Veh[i][0])
+        veh_y.append(G.Veh[i][1])
+
+    for i in range(G.n):
+        tar_x.append(G.Tar[i][0])
+        tar_y.append(G.Tar[i][1])
+
     for index in range(1, len(F), 1):
-        print(C[F[index - 1] - 1][F[index] - 1])
-        
+        E_1.append(C[F[index - 1] - 1][F[index] - 1])
+
+    for i in range(G.m):   
+        Veh.append(i*(G.n + 2) + 1)
+        Veh_depo.append((i + 1)*(G.n + 2))
+
+    for j in range(G.n):
+        Tar.append([])
+        for i in range(G.m):
+            Tar[j].append((j + 2) + i*(G.n + 2))
+    
+    for elem in F:
+        for i in range(len(Tar)):
+            if elem in Tar[i]:
+                E_2.append(i + 1)
+        if elem in Veh:
+            E_2.append('V_%s' %(Veh.index(elem) + 1))
+        elif elem in Veh_depo:
+            E_2.append('V_%s' %(Veh_depo.index(elem) + 1))
+
+    for elem in E_2:
+        if elem in G.V:
+            row = G.V.index(elem)
+            Plot_Matrix[row].append(elem)
+            Plot_Matrix_X[row].append(G.Veh[row][0])
+            Plot_Matrix_Y[row].append(G.Veh[row][1])
+        else:
+            Plot_Matrix[row].append(elem)
+            Plot_Matrix_X[row].append(G.Tar[elem - 1][0])
+            Plot_Matrix_Y[row].append(G.Tar[elem - 1][1])
+
+    print(Veh)
+    print(Veh_depo)
+    print(Tar)
+    print(E_2)
+    print(Plot_Matrix)
+    print(Plot_Matrix_X)
+    print(Plot_Matrix_Y)
+    print(tar_x)
+
+    for i in range(len(Plot_Matrix)):
+        plt.plot(Plot_Matrix_X[i], Plot_Matrix_Y[i], 'r')
+    plt.scatter(veh_x, veh_y)
+    plt.scatter(tar_x, tar_y)
+    plt.title('Optimal Solution to HMDMURP')
+    plt.xlabel('x (m)')
+    plt.ylabel('y (m)')
+    plt.show()
     
 
 # test main functions
 
-Veh = [[1, 2, 1], [15, 60, 2], [40, 38, 1], [80, 10, 2]]
-Tar = [[1, 3], [15, 65], [20, 40], [80, 12]]
+Veh = [[1, 2, 1], [15, 60, 1.3]] # [40, 38, 1], [80, 10, 2]]
+Tar = [[1, 3], [6, 5], [15, 65], [20, 40], [80, 12]]
 
 G = TSP(len(Veh), len(Tar), Veh, Tar)
 
@@ -224,6 +300,9 @@ LKH_1 = LKH_file_generator(C_t, '/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/te
 '/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/test_1.par', '/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/test_1sol')
 LKH_1.create_cost_matrix_TSP()
 LKH_1.create_cost_matrix_PAR()
+
+# try to automate the linux terminal operation
+
 F = LKH_1.read_sol()
 print(F)
-plot_transformed_LKH(C_t, F)
+plot_transformed_LKH(G, C_t, F)
