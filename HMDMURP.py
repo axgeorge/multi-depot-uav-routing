@@ -1,6 +1,53 @@
 # TODAY'S TSP
 
-import numpy as np
+# Create a file generator class for LKH
+
+class LKH_file_generator:
+
+    def __init__(self, C, filename_tsp, filename_par):
+        self.C = C
+        self.filename_tsp = filename_tsp
+        self.filename_par = filename_par
+
+    def compile_row_string(self, a_row):
+        return str(a_row).strip(']').strip('[').replace(',','')
+
+    def create_TSP(self, name = 'test'): # here, the user inputs the cities, and their coords into the C matrix.
+        with open(self.filename_tsp, 'w') as f:
+            f.write('NAME : %s\n' % name)
+            f.write('COMMENT : few cities test problem\n')
+            f.write('TYPE : TSP\n')
+            f.write('DIMENSION : %d\n' % len(self.C))
+            f.write('EDGE_WEIGHT_TYPE : EUC_2D\n')
+            f.write('NODE_COORD_SECTION\n')
+            for row in self.C:
+                f.write('%d %d %d\n' % (row[0], row[1], row[2]))
+            f.write('EOF\n')
+
+    def create_cost_matrix_TSP(self, name = 'test_1'): # An attempt to use the cost matrix
+        with open(self.filename_tsp, 'w') as f:
+            f.write('NAME : %s\n' % name)
+            f.write('COMMENT : few cities test problem\n')
+            f.write('TYPE : TSP\n')
+            f.write('DIMENSION : %d\n' % len(self.C))
+            f.write('EDGE_WEIGHT_TYPE : EXPLICIT\n')
+            f.write('EDGE_WEIGHT_FORMAT : FULL_MATRIX\n')
+            f.write('EDGE_WEIGHT_SECTION\n')
+            for row in self.C:
+                f.write(self.compile_row_string(row) + '\n')
+            f.write('EOF\n')
+
+    def create_PAR(self, name = 'test.tsp', tour = 'testsol'):
+        with open(self.filename_par, 'w') as f:
+            f.write('PROBLEM_FILE = %s\n' % name)
+            f.write('TOUR_FILE = %s\n' % tour)
+            f.write('RUNS = 10')
+
+    def create_cost_matrix_PAR(self, name = 'test_1.tsp', tour = 'test_1sol'):
+        with open(self.filename_par, 'w') as f:
+            f.write('PROBLEM_FILE = %s\n' % name)
+            f.write('TOUR_FILE = %s\n' % tour)
+            f.write('RUNS = 10')
 
 # Class TSP helps us represent the HMDMURP as a Multiple One-In-A-Set ATSP
 
@@ -97,37 +144,6 @@ class TSP:
             C.append(C_i)
         return C 
 
-# test functions helps me test some random examples and improve my understanding of how code is working
-
-#A = [[(1, 2), (2, 3)], [(2, 3), (3, 4)], [(3, 4), (4, 5)]]
-#print(A[2].index((4, 5)))
-    
-
-
-# test main functions
-
-Veh = [[1, 2, 1], [2, 3, 2], [3, 4, 1]] #[4, 5, 2]]
-Tar = [[10, 20], [30, 40]] #[40, 50], [50, 60]]
-
-G = TSP(len(Veh), len(Tar), Veh, Tar)
-
-print(G.V)
-print(G.V_d)
-print(G.T)
-print(G.V_i)
-print(G.find_E_i(1))
-#C_1 = G.find_C_i_initial()
-#G.append_cost_edge(C_1, 1, 'T_1_3', 'T_1_2', 5)
-#C_2 = G.find_C_i_initial()
-#G.append_cost_edge(C_2, 2, 'T_2_3', 'T_2_2', 5)
-#C = [C_1, C_2]
-#print(C)
-#M = G.find_C_initial()
-#print(M)
-#print(G.create_cost_i(2, 10))
-#print(G.distance(30, 40, 40, 50, 2))
-#G.create_multiple_one_in_a_set_ATSP(10)
-
 
 # Transform the multiple one-in-a-set ATSP to a single ATSP using the modified Noon Bean Transformation
 
@@ -162,13 +178,32 @@ def transformation_algorithm(G):
                     C_t[(G.m - 1)*(G.n + 2) + j][0*(G.n + 2) + k] = 0 # transformation step 8
 
                 C_t[i*(G.n + 2) + j][(i + 1)*(G.n + 2) + (G.n + 1)] = C[i + 1][j][0] + M # transformation step 9
-                C_t[(G.m - 1)*(G.n + 2) + j][G.n + 1] = C[0][j][0] # transformation step 10
-
-
-    print(C_t)
-    print(C)
-    print(M)
+                C_t[(G.m - 1)*(G.n + 2) + j][G.n + 1] = C[0][j][0] + M # transformation step 10
+    return C_t
     
-    
-transformation_algorithm(G)
 
+# test main functions
+
+Veh = [[1, 2, 1], [2, 3, 2], [3, 4, 1], [4, 5, 2]]
+Tar = [[10, 20], [30, 40], [40, 50], [50, 60]]
+
+G = TSP(len(Veh), len(Tar), Veh, Tar)
+
+print(G.V)
+print(G.V_d)
+print(G.T)
+print(G.V_i)
+print(G.find_E_i(1))    
+C_t = transformation_algorithm(G)
+print(C_t)
+
+C = [[1, 0, 0], [2, 10, 0], [3, 2, 4], [4, 5, 2]]
+
+D = [[0, 12, 14, 17], [12, 0, 15, 18], [14, 15, 0, 29], [17, 18, 29, 0]]
+
+LKH_1 = LKH_file_generator(C, '/home/nykabhishek/George_Allen/test.tsp', '/home/nykabhishek/George_Allen/test.par')
+LKH_2 = LKH_file_generator(D, '/home/nykabhishek/George_Allen/test_1.tsp', '/home/nykabhishek/George_Allen/test_1.par')
+LKH_1.create_TSP()
+LKH_1.create_PAR()
+LKH_2.create_cost_matrix_TSP()
+LKH_2.create_cost_matrix_PAR()
