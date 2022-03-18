@@ -24,7 +24,7 @@ class LKH_file_generator:
                 f.write('%d %d %d\n' % (row[0], row[1], row[2]))
             f.write('EOF\n')
 
-    def create_cost_matrix_TSP(self, name = 'test_1'): # An attempt to use the cost matrix
+    def create_cost_matrix_TSP(self, name = 'test_1'): # here, the user can input the cost matrix directly.
         with open(self.filename_tsp, 'w') as f:
             f.write('NAME : %s\n' % name)
             f.write('COMMENT : few cities test problem\n')
@@ -88,11 +88,12 @@ class TSP:
         return C_i
 
     def find_C_initial(self):
+        disjoint = 999999
         C = []
         for row in range(self.m*(self.n + 2)):
             C.append([])
             for col in range(self.m*(self.n + 2)):
-                C[row].append('None')
+                C[row].append(disjoint)
         return C
 
     def append_cost_edge(self, C_i, veh_num, ver1, ver2, dist):
@@ -179,6 +180,11 @@ def transformation_algorithm(G):
 
                 C_t[i*(G.n + 2) + j][(i + 1)*(G.n + 2) + (G.n + 1)] = C[i + 1][j][0] + M # transformation step 9
                 C_t[(G.m - 1)*(G.n + 2) + j][G.n + 1] = C[0][j][0] + M # transformation step 10
+
+    for i in range(len(C_t)):
+        for j in range(len(C_t)):
+            C_t[i][j] = int(C_t[i][j]) # need to make all the entries integer values for LKH to work
+    
     return C_t
     
 
@@ -197,13 +203,6 @@ print(G.find_E_i(1))
 C_t = transformation_algorithm(G)
 print(C_t)
 
-C = [[1, 0, 0], [2, 10, 0], [3, 2, 4], [4, 5, 2]]
-
-D = [[0, 12, 14, 17], [12, 0, 15, 18], [14, 15, 0, 29], [17, 18, 29, 0]]
-
-LKH_1 = LKH_file_generator(C, '/home/nykabhishek/George_Allen/test.tsp', '/home/nykabhishek/George_Allen/test.par')
-LKH_2 = LKH_file_generator(D, '/home/nykabhishek/George_Allen/test_1.tsp', '/home/nykabhishek/George_Allen/test_1.par')
-LKH_1.create_TSP()
-LKH_1.create_PAR()
-LKH_2.create_cost_matrix_TSP()
-LKH_2.create_cost_matrix_PAR()
+LKH_1 = LKH_file_generator(C_t, '/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/test_1.tsp', '/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/test_1.par')
+LKH_1.create_cost_matrix_TSP()
+LKH_1.create_cost_matrix_PAR()
