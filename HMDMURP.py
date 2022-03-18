@@ -4,10 +4,11 @@
 
 class LKH_file_generator:
 
-    def __init__(self, C, filename_tsp, filename_par):
+    def __init__(self, C, filename_tsp, filename_par, filename_sol):
         self.C = C
         self.filename_tsp = filename_tsp
         self.filename_par = filename_par
+        self.filename_sol = filename_sol
 
     def compile_row_string(self, a_row):
         return str(a_row).strip(']').strip('[').replace(',','')
@@ -16,7 +17,7 @@ class LKH_file_generator:
         with open(self.filename_tsp, 'w') as f:
             f.write('NAME : %s\n' % name)
             f.write('COMMENT : few cities test problem\n')
-            f.write('TYPE : TSP\n')
+            f.write('TYPE : ATSP\n')
             f.write('DIMENSION : %d\n' % len(self.C))
             f.write('EDGE_WEIGHT_TYPE : EUC_2D\n')
             f.write('NODE_COORD_SECTION\n')
@@ -28,7 +29,7 @@ class LKH_file_generator:
         with open(self.filename_tsp, 'w') as f:
             f.write('NAME : %s\n' % name)
             f.write('COMMENT : few cities test problem\n')
-            f.write('TYPE : TSP\n')
+            f.write('TYPE : ATSP\n')
             f.write('DIMENSION : %d\n' % len(self.C))
             f.write('EDGE_WEIGHT_TYPE : EXPLICIT\n')
             f.write('EDGE_WEIGHT_FORMAT : FULL_MATRIX\n')
@@ -48,6 +49,14 @@ class LKH_file_generator:
             f.write('PROBLEM_FILE = %s\n' % name)
             f.write('TOUR_FILE = %s\n' % tour)
             f.write('RUNS = 10')
+
+    def read_sol(self):
+        F = []
+        with open(self.filename_sol) as f:
+            for index, line in enumerate(f):
+                if index > 5 and index < len(self.C) + 6:
+                    F.append(int(line))
+        return F      
 
 # Class TSP helps us represent the HMDMURP as a Multiple One-In-A-Set ATSP
 
@@ -88,7 +97,7 @@ class TSP:
         return C_i
 
     def find_C_initial(self):
-        disjoint = 999999
+        disjoint = 9999999
         C = []
         for row in range(self.m*(self.n + 2)):
             C.append([])
@@ -186,12 +195,20 @@ def transformation_algorithm(G):
             C_t[i][j] = int(C_t[i][j]) # need to make all the entries integer values for LKH to work
     
     return C_t
+
+# Plot the optimal tour on the transformed graph    
+
+def plot_transformed_LKH(C, F):
+    E = []
+    for index in range(1, len(F), 1):
+        print(C[F[index - 1] - 1][F[index] - 1])
+        
     
 
 # test main functions
 
-Veh = [[1, 2, 1], [2, 3, 2], [3, 4, 1], [4, 5, 2]]
-Tar = [[10, 20], [30, 40], [40, 50], [50, 60]]
+Veh = [[1, 2, 1], [15, 60, 2], [40, 38, 1], [80, 10, 2]]
+Tar = [[1, 3], [15, 65], [20, 40], [80, 12]]
 
 G = TSP(len(Veh), len(Tar), Veh, Tar)
 
@@ -203,6 +220,10 @@ print(G.find_E_i(1))
 C_t = transformation_algorithm(G)
 print(C_t)
 
-LKH_1 = LKH_file_generator(C_t, '/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/test_1.tsp', '/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/test_1.par')
+LKH_1 = LKH_file_generator(C_t, '/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/test_1.tsp', 
+'/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/test_1.par', '/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/test_1sol')
 LKH_1.create_cost_matrix_TSP()
 LKH_1.create_cost_matrix_PAR()
+F = LKH_1.read_sol()
+print(F)
+plot_transformed_LKH(C_t, F)
