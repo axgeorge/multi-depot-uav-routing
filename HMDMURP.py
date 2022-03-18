@@ -106,8 +106,8 @@ class TSP:
 
 # test main functions
 
-Veh = [[1, 2, 1], [2, 3, 2], [3, 4, 1], [4, 5, 2]]
-Tar = [[10, 20], [30, 40], [40, 50], [50, 60]]
+Veh = [[1, 2, 1], [2, 3, 2], [3, 4, 1]] #[4, 5, 2]]
+Tar = [[10, 20], [30, 40]] #[40, 50], [50, 60]]
 
 G = TSP(len(Veh), len(Tar), Veh, Tar)
 
@@ -134,9 +134,40 @@ print(G.find_E_i(1))
 def transformation_algorithm(G):
     C_t = G.find_C_initial()
     C = G.create_multiple_one_in_a_set_ATSP(10)
-    print(G.find_max_cost_edge_C_i(C[1]))
-    print(C[1])
+    MAX = [G.find_max_cost_edge_C_i(C[i]) for i in range(len(C))]
+    M = 2*(G.n + G.m)*(max(MAX))
+
+    for i in range(G.m):
+        for j in range(1, (G.n + 2) - 1, 1):  
+            C_t[i*(G.n + 2)][i*(G.n + 2) + j] = C[i][0][j] + M  # transformation step 1
+            C_t[i*(G.n + 2)][i*(G.n + 2) + (G.n + 2) - 1] = M  # transformation step 2
     
+    for i in range(G.m - 1):
+        for j in range(G.n):
+            C_t[i*(G.n + 2) + (G.n + 2) - 1][(i + 1)*(G.n + 2)] = 0 # transformation step 3
+
+    C_t[G.m*(G.n + 2) - 1][0] = 0 # transformation step 4
+
+    for i in range(G.m - 1):
+        for j in range(1, (G.n + 2) - 1, 1):
+            for k in range(1, (G.n + 2) - 1, 1):
+                if (i*(G.n + 2) + j) != (i*(G.n + 2) + k):
+                    C_t[i*(G.n + 2) + j][(i + 1)*(G.n + 2) + k] = C[i + 1][j][k] + M # transformation step 5
+                else:
+                    C_t[i*(G.n + 2) + j][(i + 1)*(G.n + 2) + k] = 0 # transformation step 7
+
+                if ((G.m - 1)*(G.n + 2) + j) != ((G.m - 1)*(G.n + 2) + k):
+                    C_t[(G.m - 1)*(G.n + 2) + j][0*(G.n + 2) + k] = C[0][j][k] + M # transformation step 6
+                else:
+                    C_t[(G.m - 1)*(G.n + 2) + j][0*(G.n + 2) + k] = 0 # transformation step 8
+
+                C_t[i*(G.n + 2) + j][(i + 1)*(G.n + 2) + (G.n + 1)] = C[i + 1][j][0] + M # transformation step 9
+                C_t[(G.m - 1)*(G.n + 2) + j][G.n + 1] = C[0][j][0] # transformation step 10
+
+
+    print(C_t)
+    print(C)
+    print(M)
     
     
 transformation_algorithm(G)
