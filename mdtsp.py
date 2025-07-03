@@ -1,4 +1,7 @@
-# TODAY'S TSP
+"""
+A Heuristic Solver for Multi-Depot Heterogeneous UAV Routing.
+Reference: Today's Traveling Salesman Problem -- published in IEEE RAM Dec 2010. 
+"""
 
 import string
 import matplotlib
@@ -6,12 +9,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-# Create a file generator class for LKH
+matplotlib.use('Qt5Agg')
+
 
 class LKH_file_generator:
+    """
+    Instance file generator for LKH solver.
+    """
 
-    def __init__(self, C, filename_tsp, filename_par, filename_sol):
-        self.C = C
+    def __init__(self, instance, filename_tsp, filename_par, filename_sol):
+        self.inst = instance
         self.filename_tsp = filename_tsp
         self.filename_par = filename_par
         self.filename_sol = filename_sol
@@ -19,38 +26,44 @@ class LKH_file_generator:
     def compile_row_string(self, a_row):
         return str(a_row).strip(']').strip('[').replace(',','')
 
-    def create_TSP(self, name = 'test'): # here, the user inputs the cities, and their coords into the C matrix.
+    def create_coord_TSP(self, name = 'test_coord'):
+        """
+        Represent instance as cities, and their coords.
+        """ 
         with open(self.filename_tsp, 'w') as f:
             f.write('NAME : %s\n' % name)
             f.write('COMMENT : few cities test problem\n')
             f.write('TYPE : ATSP\n')
-            f.write('DIMENSION : %d\n' % len(self.C))
+            f.write('DIMENSION : %d\n' % len(self.inst))
             f.write('EDGE_WEIGHT_TYPE : EUC_2D\n')
             f.write('NODE_COORD_SECTION\n')
-            for row in self.C:
+            for row in self.inst:
                 f.write('%d %d %d\n' % (row[0], row[1], row[2]))
             f.write('EOF\n')
 
-    def create_cost_matrix_TSP(self, name = 'test_1'): # here, the user can input the cost matrix directly.
+    def create_cost_matrix_TSP(self, name = 'test_matrix'):
+        """
+        Represent instance as cost matrix.
+        """ 
         with open(self.filename_tsp, 'w') as f:
             f.write('NAME : %s\n' % name)
             f.write('COMMENT : few cities test problem\n')
             f.write('TYPE : ATSP\n')
-            f.write('DIMENSION : %d\n' % len(self.C))
+            f.write('DIMENSION : %d\n' % len(self.inst))
             f.write('EDGE_WEIGHT_TYPE : EXPLICIT\n')
             f.write('EDGE_WEIGHT_FORMAT : FULL_MATRIX\n')
             f.write('EDGE_WEIGHT_SECTION\n')
-            for row in self.C:
+            for row in self.inst:
                 f.write(self.compile_row_string(row) + '\n')
             f.write('EOF\n')
 
-    def create_PAR(self, name = 'test.tsp', tour = 'testsol'):
+    def create_coord_PAR(self, name = 'test_coord.tsp', tour = 'test_coord_sol'):
         with open(self.filename_par, 'w') as f:
             f.write('PROBLEM_FILE = %s\n' % name)
             f.write('TOUR_FILE = %s\n' % tour)
             f.write('RUNS = 10')
 
-    def create_cost_matrix_PAR(self, name = 'test_1.tsp', tour = 'test_1sol'):
+    def create_cost_matrix_PAR(self, name = 'test_matrix.tsp', tour = 'test_matrix_sol'):
         with open(self.filename_par, 'w') as f:
             f.write('PROBLEM_FILE = %s\n' % name)
             f.write('TOUR_FILE = %s\n' % tour)
@@ -60,13 +73,15 @@ class LKH_file_generator:
         F = []
         with open(self.filename_sol) as f:
             for index, line in enumerate(f):
-                if index > 5 and index < len(self.C) + 6:
+                if index > 5 and index < len(self.inst) + 6:
                     F.append(int(line))
         return F      
 
-# Class TSP helps us represent the HMDMURP as a Multiple One-In-A-Set ATSP
 
 class TSP:
+    """
+    Transform MDHUR to a Multiple One-Of-A-Set ATSP.
+    """
 
     def __init__(self, m, n, Veh, Tar): 
         self.m = m       # the number of vehicles
@@ -161,9 +176,10 @@ class TSP:
         return C 
 
 
-# Transform the multiple one-in-a-set ATSP to a single ATSP using the modified Noon Bean Transformation
-
 def transformation_algorithm(G):
+    """
+    Transform multiple one-of-a-set ATSP to a single ATSP using the modified Noon Bean Transformation.
+    """
     C_t = G.find_C_initial()
     C = G.create_multiple_one_in_a_set_ATSP(10)
     MAX = [G.find_max_cost_edge_C_i(C[i]) for i in range(len(C))]
@@ -201,10 +217,12 @@ def transformation_algorithm(G):
             C_t[i][j] = int(C_t[i][j]) # need to make all the entries integer values for LKH to work
     
     return C_t
-
-# Plot the optimal tour to the HMDMURP   
+   
 
 def plot_transformed_LKH(G, C, F):
+    """
+    Extract and plot MDHUR solution from the LKH ATSP solution.
+    """
 
     Plot_Matrix = []
     Plot_Matrix_X = []
@@ -275,7 +293,7 @@ def plot_transformed_LKH(G, C, F):
         plt.plot(Plot_Matrix_X[i], Plot_Matrix_Y[i], 'r')
     plt.scatter(veh_x, veh_y)
     plt.scatter(tar_x, tar_y)
-    plt.title('Optimal Solution to HMDMURP')
+    plt.title('UAV ROUTES')
     plt.xlabel('x (m)')
     plt.ylabel('y (m)')
     plt.show()
