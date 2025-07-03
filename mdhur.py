@@ -1,5 +1,5 @@
 """
-A Heuristic Solver for Multi-Depot Heterogeneous UAV Routing.
+A Heuristic Solver for Multi-Depot UAV Routing.
 Reference: Today's Traveling Salesman Problem -- published in IEEE RAM Dec 2010. 
 """
 
@@ -80,7 +80,7 @@ class LKH_file_generator:
 
 class TSP:
     """
-    Transform MDHUR to a Multiple One-Of-A-Set ATSP.
+    Transform MDUR to a Multiple One-Of-A-Set ATSP.
     """
 
     def __init__(self, m, n, Veh, Tar): 
@@ -221,7 +221,7 @@ def transformation_algorithm(G):
 
 def plot_transformed_LKH(G, C, F, route_col='gray', veh_col='k', tar_col='k'):
     """
-    Extract and plot MDHUR solution from the LKH ATSP solution.
+    Extract and plot MDUR solution from the LKH ATSP solution.
     """
 
     Plot_Matrix = []
