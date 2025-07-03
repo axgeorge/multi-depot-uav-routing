@@ -219,7 +219,7 @@ def transformation_algorithm(G):
     return C_t
    
 
-def plot_transformed_LKH(G, C, F):
+def plot_transformed_LKH(G, C, F, route_col='gray', veh_col='k', tar_col='k'):
     """
     Extract and plot MDHUR solution from the LKH ATSP solution.
     """
@@ -280,47 +280,23 @@ def plot_transformed_LKH(G, C, F):
             Plot_Matrix_X[row].append(G.Tar[elem - 1][0])
             Plot_Matrix_Y[row].append(G.Tar[elem - 1][1])
 
-    print(Veh)
-    print(Veh_depo)
-    print(Tar)
+    # print(Veh)
+    # print(Veh_depo)
+    # print(Tar)
     print(E_2)
-    print(Plot_Matrix)
-    print(Plot_Matrix_X)
-    print(Plot_Matrix_Y)
-    print(tar_x)
+    # print(Plot_Matrix)
+    # print(Plot_Matrix_X)
+    # print(Plot_Matrix_Y)
+    # print(tar_x)
 
     for i in range(len(Plot_Matrix)):
-        plt.plot(Plot_Matrix_X[i], Plot_Matrix_Y[i], 'r')
-    plt.scatter(veh_x, veh_y)
-    plt.scatter(tar_x, tar_y)
+        plt.plot(Plot_Matrix_X[i], Plot_Matrix_Y[i], color=route_col)
+    plt.scatter(veh_x, veh_y, color=veh_col, label="UAV", marker="^", s=50)
+    plt.scatter(tar_x, tar_y, color=tar_col, label="Target", marker="x", s=80)
     plt.title('UAV ROUTES')
-    plt.xlabel('x (m)')
-    plt.ylabel('y (m)')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.grid()
+    plt.legend()
     plt.show()
     
-
-# test main functions
-
-Veh = [[1, 2, 1], [15, 60, 1.3], [40, 38, 1], [80, 10, 2]]
-Tar = [[1, 3], [6, 5]] #, [15, 65], [20, 40], [80, 12]]
-
-G = TSP(len(Veh), len(Tar), Veh, Tar)
-
-print(G.V)
-print(G.V_d)
-print(G.T)
-print(G.V_i)
-print(G.find_E_i(1))    
-C_t = transformation_algorithm(G)
-print(C_t)
-
-LKH_1 = LKH_file_generator(C_t, '/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/test_1.tsp', 
-'/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/test_1.par', '/home/nykabhishek/George_Allen/LKH/LKH-2.0.9/test_1sol')
-LKH_1.create_cost_matrix_TSP()
-LKH_1.create_cost_matrix_PAR()
-
-# try to automate the linux terminal operation
-
-F = LKH_1.read_sol()
-print(F)
-plot_transformed_LKH(G, C_t, F)
