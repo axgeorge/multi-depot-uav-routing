@@ -5,7 +5,7 @@ Solve the instances and plot the solutions.
 
 import random
 import subprocess
-import mdhur as solver
+import mdur as solver
 
 random.seed(100)
 
