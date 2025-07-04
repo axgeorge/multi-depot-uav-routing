@@ -1,5 +1,9 @@
 # Multi-Depot UAV Routing
 
+<p align="center">
+<img width="640" height="480" alt="Image" src="https://github.com/user-attachments/assets/20d67976-c63c-4e6d-8abb-f961f78118dd" />
+</p>
+
 This project generates and solves instances of a **Multi-Depot UAV Routing Problem**. It supports:
 
 - Multiple depots (UAVs)
